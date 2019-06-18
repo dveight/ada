@@ -1,0 +1,52 @@
+syntax = "proto3";
+package ada;
+
+import "google/protobuf/struct.proto";
+
+// [START messages]
+message Input {
+  string location = 1;
+  Frames range = 2;
+}
+
+message Output {
+  string location = 1;
+  Frames range = 2;
+}
+
+message Template {
+  string location = 1;
+}
+
+message Script {
+  string dir = 1;
+  string name = 2;
+}
+
+message Frames {
+  int32 start = 1;
+  int32 end = 2;
+}
+
+
+message Context {
+  repeated Input inputs = 1;
+  repeated Output outputs = 2;
+  Template template = 3;
+  Script output_script = 4;
+  google.protobuf.Struct aliases = 100;
+  enum HostsTypes {
+    NUKE = 0;
+    MAYA = 1;
+    HOUDINI = 2;
+    NATRON = 3;
+    CLARISSE = 4;
+    KATANA = 5;
+    MARI = 6;
+  }
+  HostsTypes host = 6;
+  string job = 7;
+  string shot = 8;
+  string format = 9;
+  Frames script_frame_range = 10;
+}

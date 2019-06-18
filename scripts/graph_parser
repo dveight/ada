@@ -1,0 +1,93 @@
+#!/usr/bin/env python2.7
+
+"""command line script for launching Ada in any host application that has been added to the applications
+repo"""
+import sys
+import os
+import argparse
+import logging
+import subprocess
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+
+sys.path.append("/Users/patricknagle/packages/pipeline/lib/python")
+
+from ada.core.io import (
+    read_graph_file,
+)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Ada is a template baking system that can be run in any application that supports python."
+    )
+    parser.add_argument(
+        "application",
+        action="store",
+        choices={"nuke", "katana"},
+        help="the application you are running Ada inside of. Nuke, Maya, Houdini, Katana etc."
+    )
+
+    parser.add_argument(
+        "template",
+        action="store",
+        help="Path to the template you want to bake"
+    )
+
+    parser.add_argument(
+        "--render-nodes",
+        action="store_true",
+        help=""
+    )
+
+    return parser.parse_args()
+
+
+def run_command(command):
+    """
+    Run command and print out stdout in real time.
+
+    Args:
+        command (list): list of args that subprocess will run.
+
+    Returns:
+        int: poll code.
+    """
+    process = subprocess.Popen(command, stdout=subprocess.PIPE)
+    while True:
+        output = process.stdout.readline()
+        if output == '' and process.poll() is not None:
+            break
+        if output:
+            print output.strip()
+
+    rc = process.poll()
+    return rc
+
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    template = args.template
+
+    if not os.path.exists(template):
+        logging.warning(
+            "No template found: {0}".format(template)
+        )
+        sys.exit(-1)
+
+    pre, ext = os.path.splitext(template)
+    graph_file = pre + ".graph"
+
+    if not os.path.exists(graph_file):
+        logging.warning(
+            "No graph file found: {0}".format(graph_file)
+        )
+        sys.exit(-1)
+
+    graph = read_graph_file(graph_file)
+    print graph
+    if args.render_nodes:
+        for node in graph.nodes:
+            if node.Class == "Write":
+                print node.name
