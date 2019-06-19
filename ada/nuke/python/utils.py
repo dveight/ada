@@ -55,7 +55,7 @@ def parse_tcl_string(args):
                     previous_attr = getattr(previous_attr, argument)
                 except AttributeError:
                     if previous_attr:
-                        previous_attr = previous_attr[argument]
+                        previous_attr = previous_attr.get(argument)
         except IndexError:
             return previous_attr
         except AttributeError:

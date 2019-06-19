@@ -378,26 +378,26 @@ def ada_knob_changed():
 
 def add_knob_to_ada_tab(node, ada_type, knob, alias=None):
 
-    curent_knobs = node[ada_type]
-    curent_knobs_list = curent_knobs.value().split(",")
+    current_knobs = node[ada_type]
+    current_knobs_list = current_knobs.value().split(",")
 
-    if knob.name() in curent_knobs_list:
+    if knob.name() in current_knobs_list:
         return
 
-    if curent_knobs_list == [""]:
-        curent_knobs_list = list()
+    if current_knobs_list == [""]:
+        current_knobs_list = list()
 
     if ada_type == "knobs_to_bake" or ada_type == "knobs_to_execute":
-        curent_knobs_list.append(knob.name())
-        sorted_knobs = sorted(curent_knobs_list)
+        current_knobs_list.append(knob.name())
+        sorted_knobs = sorted(current_knobs_list)
 
     elif ada_type == "knobs_to_set":
         expression = "{}=[Ada aliases {}]".format(knob.name(), alias)
-        curent_knobs_list.append(expression)
-        sorted_knobs = sorted(curent_knobs_list)
+        current_knobs_list.append(expression)
+        sorted_knobs = sorted(current_knobs_list)
 
     joined_knobs = ",".join(sorted_knobs)
-    curent_knobs.setValue(joined_knobs)
+    current_knobs.setValue(joined_knobs)
 
 
 def set_alias_knob(knob, expression, alias_data):
@@ -477,34 +477,3 @@ def set_io_item(knob, current_alias, alias_data, iotype):
             io_attr[int(alias_data.index)].location = alias_data.default_value
         elif iotype == "outputs":
             io_attr[int(alias_data.index)].location = alias_data.default_value
-
-
-def set_output_item(knob, current_alias, alias_data):
-    """
-    Add a knob to set to the correct knob and add an output to the ada context.
-
-    Args:
-        knob (nuke.Knob): The knob we want to add the expression to.
-        current_alias (str): The knobs current alias value.
-        alias_data (namedtuple): The data from the knobs_to_serialise knob.
-
-    """
-    expression_to_set = "[Ada outputs {index} location]".format(index=alias_data.index)
-    knob.setValue(expression_to_set)
-    try:
-        if represents_int(alias_data.index):
-            nuke.Ada.outputs[int(alias_data.index)].location = alias_data.default_value
-
-    except IndexError:
-        next_output = len(nuke.Ada.outputs)
-        new_output = nuke.Ada.outputs.add()
-        new_output.location = alias_data.default_value
-
-        new_alias = OUTPUT_STRING.format(
-            knob=alias_data.knob,
-            index=next_output,
-            location=alias_data.default_value,
-            start=alias_data.start,
-            end=alias_data.end,
-        )
-        knob.value().replace(current_alias, new_alias)
