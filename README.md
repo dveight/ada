@@ -41,5 +41,33 @@ to patch the sitepackages that comes with Nuke.
     
     
     sudo cp six-1.12.0-py2.7.egg /Applications/Nuke11.3v1/Nuke11.3v1.app/Contents/MacOS/pythonextensions/site-packages/
-              
+
+# Building
+
+You will need CMake 3.13 or higher in order to build the proto buffer files and install the scripts and python files into the specified location. A recommended location for the install is to a local directory called `packages` which can then easily be added to the `PATH` and `PYTHONPATH`.
+
+update your .profile or equivalent with the following:
+```
+export PATH=/Users/$USER/packages/bin:$PATH
+export PYTHONPATH=/Users/$USER/packages/lib/python:$PYTHONPATH
+```
+
+From a separate build directory, eg. `~builds/ada/`, you can run the following cmake command to build the project.
+
+`cmake -DCMAKE_INSTALL_PREFIX=~/packages/ ~/dev/nuke/ada/`
+
+Then to finally build the proto files and install it, simply run
+
+```make install```
+
+# Testing
+
+Testing is all done using nosetest, unittest2 and cmake, so make sure the trifecta of unit testing is installed.
+
+```make test```
+
+or with more verbosity and vigor
+
+```make check```
+
 Done! 

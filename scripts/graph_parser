@@ -10,8 +10,6 @@ import subprocess
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-sys.path.append("/Users/patricknagle/packages/pipeline/lib/python")
-
 from ada.core.io import (
     read_graph_file,
 )

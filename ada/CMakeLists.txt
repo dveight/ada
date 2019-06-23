@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-set (ADA_PYTHON /pipeline/lib/python/ada)
+set(ADA_PYTHON lib/python/ada)
 set(ADA_CORE_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/${ADA_PYTHON})
 
 set(ADA_PROTO_SOURCE ${PROJECT_SOURCE_DIR}/ada/proto)
