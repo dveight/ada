@@ -5,13 +5,13 @@ import graph_pb2
 from common import getLog
 
 
-def write_proto_file(data, dir, name, ext):
+def write_proto_file(data, directory, name, ext):
     """
     Simple write function to be used in all applications to serialise a rich object to binary strings.
 
     Args:
         data (protobuf): A protocol buffer to serialise to a binary string.
-        dir (str): A valid directory that exists on disk.
+        directory (str): A valid directory that exists on disk.
         name (str): The name of the protofile we are trying to write.
         ext (str): An extension for our serialised protocol buffer.
 
@@ -19,14 +19,13 @@ def write_proto_file(data, dir, name, ext):
         str: Path to the serialised data.
 
     """
-    path = os.path.join(dir, name + ext)
-    if not os.path.exists(dir):
+    path = os.path.join(directory, name + ext)
+    if not os.path.exists(directory):
         getLog().error("Directory does not exist: {}".format(path))
         return
 
-    output = open(path, "wb")
-    output.write(data.SerializeToString())
-    output.close()
+    with open(path, "wb") as output:
+        output.write(data.SerializeToString())
 
     return path
 
@@ -49,9 +48,8 @@ def read_graph_file(path):
         getLog().error("Missing graph file: {}".format(path))
         return
 
-    read_file = open(path, "rb")
-    node_graph.ParseFromString(read_file.read())
-    read_file.close()
+    with open(path, "rb") as read_file:
+        node_graph.ParseFromString(read_file.read())
 
     return node_graph
 
@@ -72,8 +70,7 @@ def read_ada_file(path):
         getLog().error("Missing ada file: {}".format(path))
         return
 
-    read_file = open(path, "rb")
-    context.ParseFromString(read_file.read())
-    read_file.close()
+    with open(path, "rb") as read_file:
+        context.ParseFromString(read_file.read())
 
     return context
