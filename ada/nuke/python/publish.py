@@ -42,6 +42,8 @@ def publish(save_dir, save_name, nodes=None):
     graph = serialise_node_knobs(queue)
     write_proto_file(graph, save_dir, "F_{0}".format(save_name), ".graph")
 
+    return graph, script_path
+
 
 def serialise_node_knobs(queues):
     """
@@ -96,9 +98,11 @@ def serialise_node_knobs(queues):
 
                 elif isinstance(alias_settings, KnobInput):
                     attribute.type = 1
+                    attribute.alias.name = alias_settings.alias
 
                 elif isinstance(alias_settings, KnobOutput):
                     attribute.type = 2
+                    attribute.alias.name = alias_settings.alias
 
                 for field_name in field_names:
                     if hasattr(knob_object, field_name):

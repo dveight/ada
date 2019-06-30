@@ -56,13 +56,29 @@ def print_template_args(results):
     """
     messages = []
     aliases = results.get("aliases", list())
+    inputs = results.get("inputs", list())
+    outputs = results.get("outputs", list())
+
     template_name = os.path.basename(args.template)
 
-    message = "{} requires {} inputs".format(template_name, results.get("inputs", 0))
+    message = "{} requires {} inputs".format(template_name, len(results.get("inputs", 0)))
     messages.append(message)
+    for _input in inputs:
+        values = " "
+        if _input["values"] is not None:
+            values = "\tPossible values: {}".format(", ".join(_input["values"]))
+        argument = "input argument: --input-{}\n\tdefault value: {}\n{}".format(_input["name"], _input["value"], values)
+        messages.append(argument)
 
-    message = "{} requires {} outputs\n".format(template_name, results.get("outputs", 0))
+    message = "{} requires {} outputs\n".format(template_name, len(results.get("outputs", 0)))
+
     messages.append(message)
+    for _input in outputs:
+        values = " "
+        if _input["values"] is not None:
+            values = "\tPossible values: {}".format(", ".join(_input["values"]))
+        argument = "output argument: --output-{}\n\tdefault value: {}\n{}".format(_input["name"], _input["value"], values)
+        messages.append(argument)
 
     message = "{} queues {}\n".format(template_name, results.get("queues", 0))
     messages.append(message)
@@ -75,12 +91,14 @@ def print_template_args(results):
 
     messages.append(message)
     messages.append(line)
+
     for alias in aliases:
         values = " "
         if alias["values"] is not None:
             values = "\tPossible values: {}".format(", ".join(alias["values"]))
         argument = "alias argument: --{}\n\tdefault value: {}\n{}".format(alias["name"], alias["value"], values)
         messages.append(argument)
+
     if messages:
         message = "Below is a list of template specific " \
                   "arguments that you can pass into the Ada CLI"
@@ -220,7 +238,7 @@ def parse_args():
                         dest=attribute.alias.name,
                         action="store",
                         default=attribute.value.strip(),
-                        metavar="This is a variable specified "
+                        metavar="This is a attribute variable specified "
                                 "in the template: {0}".format(attribute.alias.name)
                     )
                     aliases.append(
@@ -231,13 +249,39 @@ def parse_args():
                         )
                     )
                 elif kind == "INPUT":
-                    inputs.append(attribute.value)
+                    parser.add_argument(
+                        "--input-{0}".format(attribute.alias.name),
+                        dest="input_{0}".format(attribute.alias.name),
+                        action="store",
+                        default=attribute.alias.name,
+                        metavar="This is a input variable specified "
+                                "in the template: {0}".format(attribute.alias.name)
+                    )
+                    inputs.append(
+                        dict(
+                            name=attribute.alias.name,
+                            value=attribute.value,
+                            values=attribute.values or None
+                        )
+                    )
 
                 elif kind == "OUTPUT":
-                    outputs.append(attribute.value)
-
-        requirements = dict(aliases=aliases, inputs=len(inputs), outputs=len(outputs), queues=queues)
-
+                    parser.add_argument(
+                        "--output-{0}".format(attribute.alias.name),
+                        dest="output_{0}".format(attribute.alias.name),
+                        action="store",
+                        default=attribute.value.strip(),
+                        metavar="This is a output variable specified "
+                                "in the template: {0}".format(attribute.alias.name)
+                    )
+                    outputs.append(
+                        dict(
+                            name=attribute.alias.name,
+                            value=attribute.value,
+                            values=attribute.values or None
+                        )
+                    )
+        requirements = dict(aliases=aliases, inputs=inputs, outputs=outputs, queues=queues)
     return parser.parse_args(), requirements
 
 
@@ -251,12 +295,13 @@ def run_template_with_args(args, results):
     """
 
     # very simple validation of inputs and outputs
-    assert len(args.inputs) == results["inputs"], "Wrong number of inputs! I was given {} and require {}".format(
-        len(args.inputs), results["inputs"]
-    )
-    assert len(args.outputs) == results["outputs"], "Wrong number of outputs! I was given {} and require {}".format(
-        len(args.outputs), results["outputs"]
-    )
+    print results, args
+    # assert len(args.inputs) == results["inputs"], "Wrong number of inputs! I was given {} and require {}".format(
+    #     len(args.inputs), results["inputs"]
+    # )
+    # assert len(args.outputs) == results["outputs"], "Wrong number of outputs! I was given {} and require {}".format(
+    #     len(args.outputs), results["outputs"]
+    # )
 
     # create context object and set all the data from the args
     context = ada_pb2.Context()
@@ -276,11 +321,13 @@ def run_template_with_args(args, results):
         parsed_value = getattr(args, alias["name"])
         context.aliases[alias["name"]] = parsed_value
 
-    if args.inputs:
-        for input_arg in args.inputs:
-            ctx_input = context.inputs.add()
-            for items in input_arg:
-                ctx_input.location = items
+    for _input in results["inputs"]:
+        parsed_value = getattr(args, "input_{}".format(_input["name"]))
+        context.inputs[_input["name"]] = parsed_value
+
+    for output in results["outputs"]:
+        parsed_value = getattr(args, "output_{}".format(output["name"]))
+        context.outputs[output["name"]] = parsed_value
 
     ext = ALL_FILE_EXT[context.host]
 
@@ -304,8 +351,7 @@ def run_template_with_args(args, results):
             module_name = module_name[:-1]
 
         cmd = bake.NUKE_COMMAND
-        cmd.extend([module_name, app_script_path, args.queues])
-
+        cmd.extend([module_name, app_script_path])
     pc = run_command(list(cmd))
     sys.exit(pc)
 

@@ -185,40 +185,18 @@ def add_knob_to_bake(node):
                 if node_class in INPUT_NODES:
                     if knob not in INPUT_NODES[node_class]:
                         continue
-                    next_input = len(nuke.Ada.inputs)
-                    new_input = nuke.Ada.inputs.add()
-                    new_input.location = value.value()
-
-                    input_string = INPUT_STRING.format(
-                        knob=knob,
-                        index=next_input,
-                        location=value.value(),
-                        start="",
-                        end="",
-                    )
-                    knobs.append(input_string)
+                    knob_to_serialise = INPUT_STRING.format(knob=knob, alias=alias.value(), location=value.value())
+                    knobs.append(knob_to_serialise)
 
                 elif node_class in OUTPUT_NODES:
                     if knob not in OUTPUT_NODES[node_class]:
                         continue
 
-                    next_output = len(nuke.Ada.outputs)
-                    new_output = nuke.Ada.outputs.add()
-                    new_output.location = value.value()
-
-                    output_string = OUTPUT_STRING.format(
-                        knob=knob,
-                        index=next_output,
-                        location=value.value(),
-                        start="",
-                        end="",
-                    )
-                    knobs.append(output_string)
+                    knob_to_serialise = OUTPUT_STRING.format(knob=knob, alias=alias.value(), location=value.value())
+                    knobs.append(knob_to_serialise)
 
                 else:
-                    knob_to_serialise = ALIAS_STRING.format(
-                        knob=knob, alias=alias.value(), default=value.value()
-                    )
+                    knob_to_serialise = ALIAS_STRING.format(knob=knob, alias=alias.value(), default=value.value())
                     knobs.append(knob_to_serialise)
 
         node["knobs_to_serialise"].setValue("\n".join(knobs))
@@ -287,20 +265,16 @@ if nuke.GUI:
                 self.addKnob(knob_name)
                 if knob_is_input:
                     new_knob_name = "input_{}".format(this_knob_name)
-                    data_knob = nuke.Int_Knob(
-                        new_knob_name, "Input: ", len(nuke.Ada.inputs)
-                    )
+                    data_knob = nuke.String_Knob(new_knob_name, "Input: ")
                     if ada_knob:
-                        data_knob.setValue(int(ada_knob.index))
+                        data_knob.setValue(ada_knob.alias)
                     self.alias_knobs.append(data_knob)
 
                 elif knob_is_output:
                     new_knob_name = "output_{}".format(this_knob_name)
-                    data_knob = nuke.Int_Knob(
-                        new_knob_name, "Output: ", len(nuke.Ada.outputs)
-                    )
+                    data_knob = nuke.String_Knob(new_knob_name, "Output: ")
                     if ada_knob:
-                        data_knob.setValue(int(ada_knob.index))
+                        data_knob.setValue(ada_knob.alias)
                     self.alias_knobs.append(data_knob)
                 else:
                     new_knob_name = "alias_{} ".format(this_knob_name)
@@ -363,44 +337,56 @@ def ada_knob_changed():
 
             getLog().info("Current expression {0}:{1}".format(knob.name(), expression))
 
-            ada_type = KNOB_TO_EXECUTION_TYPE.get(knob.Class())
-
+            execution_type = KNOB_TO_EXECUTION_TYPE.get(knob.Class())
             if isinstance(ada_data, KnobAlias):
-                set_alias_knob(knob, expression, ada_data)
-                add_knob_to_ada_tab(this_node, ada_type, knob, ada_data.alias)
+                set_alias_knob(knob, expression, ada_data, "aliases")
+                add_knob_to_ada_tab(this_node, execution_type, "aliases", knob, ada_data.alias)
             if isinstance(ada_data, KnobInput):
-                set_io_item(knob, current_alias, ada_data, "inputs")
-                add_knob_to_ada_tab(this_node, ada_type, knob, ada_data.index)
+                set_alias_knob(knob, expression, ada_data, "inputs")
+                add_knob_to_ada_tab(this_node, execution_type, "inputs", knob, ada_data.alias)
             if isinstance(ada_data, KnobOutput):
-                set_io_item(knob, current_alias, ada_data, "outputs")
-                add_knob_to_ada_tab(this_node, ada_type, knob, ada_data.index)
+                set_alias_knob(knob, expression, ada_data, "outputs")
+                add_knob_to_ada_tab(this_node, execution_type, "outputs", knob, ada_data.alias)
 
 
-def add_knob_to_ada_tab(node, ada_type, knob, alias=None):
+def add_knob_to_ada_tab(node, execution_type, data_type, knob, alias):
 
-    current_knobs = node[ada_type]
-    current_knobs_list = current_knobs.value().split(",")
+    ada_tab_knob = node[execution_type]
+    if execution_type == "knobs_to_bake" or execution_type == "knobs_to_execute":
+        if not node["bake_knobs"].value():
+            node["bake_knobs"].setValue(True)
 
-    if knob.name() in current_knobs_list:
-        return
+        knob_list = ada_tab_knob.value().split(",")
+        if knob_list == [""]:
+            knob_list = list()
 
-    if current_knobs_list == [""]:
-        current_knobs_list = list()
+        if knob.name() in knob_list:
+            return
 
-    if ada_type == "knobs_to_bake" or ada_type == "knobs_to_execute":
-        current_knobs_list.append(knob.name())
-        sorted_knobs = sorted(current_knobs_list)
+        knob_list.append(knob.name())
+        sorted_knobs = sorted(knob_list)
 
-    elif ada_type == "knobs_to_set":
-        expression = "{}=[Ada aliases {}]".format(knob.name(), alias)
-        current_knobs_list.append(expression)
-        sorted_knobs = sorted(current_knobs_list)
+    elif execution_type == "knobs_to_set":
+        if not node["set_knobs"].value():
+            node["set_knobs"].setValue(True)
+
+        knob_list = ada_tab_knob.toScript().split(",")
+        if knob_list == [""]:
+            knob_list = list()
+
+        expression = "{}=[Ada {} {}]".format(knob.name(), data_type, alias)
+        if expression in knob_list:
+            return
+
+        knob_list.append(expression)
+        sorted_knobs = sorted(knob_list)
 
     joined_knobs = ",".join(sorted_knobs)
-    current_knobs.setValue(joined_knobs)
+
+    ada_tab_knob.setValue(joined_knobs)
 
 
-def set_alias_knob(knob, expression, alias_data):
+def set_alias_knob(knob, expression, alias_data, kind):
     """
     Add an expression to the correct knob and add an alias to the ada context or if the user changes it then
     remove the old context item and add a new one.
@@ -415,65 +401,22 @@ def set_alias_knob(knob, expression, alias_data):
 
     value = alias_data.default_value.strip()
 
-    expression_to_set = "[Ada {key} {alias}]".format(key="aliases", alias=this_alias)
+    expression_to_set = "[Ada {kind} {value}]".format(kind=kind, value=this_alias)
 
-    if this_alias in nuke.Ada.aliases:
+    get_ada_kind = getattr(nuke.Ada, kind)
+
+    if this_alias in get_ada_kind:
         getLog().info("Updating context data: {0} = {1}".format(this_alias, value))
-        nuke.Ada.aliases[unicode(this_alias)] = value
+        get_ada_kind[this_alias] = value
 
-    elif this_alias not in nuke.Ada.aliases:
+    elif this_alias not in get_ada_kind:
         getLog().info("Setting context data: {0} = {1}".format(this_alias, value))
-        nuke.Ada.aliases[this_alias] = value
+        get_ada_kind[this_alias] = value
         knob.setExpression(expression_to_set)
 
     if this_alias not in expression and "[Ada" in expression:
         old_alias = expression.split("]")[0].split(" ")[-1]
-        del nuke.Ada.aliases[old_alias]
+        del get_ada_kind[old_alias]
         knob.setExpression(expression_to_set)
     else:
         getLog().info("Updating context data: {0} = {1}".format(this_alias, value))
-
-
-def set_io_item(knob, current_alias, alias_data, iotype):
-    """
-    Add a knob to set to the correct knob and add an input to the ada context.
-
-    Args:
-        knob (nuke.Knob): The knob we want to add the expression to.
-        current_alias (str): The knobs current alias value.
-        alias_data (namedtuple): The data from the knobs_to_serialise knob.
-        iotype (str): input or output.
-
-    """
-    expression_to_set = "[Ada {} {} location]".format(iotype, alias_data.index)
-    knob.setValue(expression_to_set)
-
-    io_attr = getattr(nuke.Ada, iotype)
-    next_item = len(io_attr)
-
-    if next_item == 0:
-        new_item = io_attr.add()
-        new_item.location = alias_data.default_value
-        if iotype == "inputs":
-            new_io_entry = INPUT_STRING.format(
-                knob=alias_data.knob,
-                index=next_item,
-                location=alias_data.default_value,
-                start=alias_data.start,
-                end=alias_data.end,
-            )
-        elif iotype == "outputs":
-            new_io_entry = OUTPUT_STRING.format(
-                knob=alias_data.knob,
-                index=next_item,
-                location=alias_data.default_value,
-                start=alias_data.start,
-                end=alias_data.end,
-            )
-        knob.value().replace(current_alias, new_io_entry)
-
-    else:
-        if iotype == "inputs":
-            io_attr[int(alias_data.index)].location = alias_data.default_value
-        elif iotype == "outputs":
-            io_attr[int(alias_data.index)].location = alias_data.default_value

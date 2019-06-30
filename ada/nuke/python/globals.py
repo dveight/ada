@@ -3,12 +3,12 @@
 from collections import namedtuple
 
 ALIAS_STRING = "alias({knob}, {alias}, {default})"
-INPUT_STRING = "input({knob}, {index}, {location}, {start}, {end})"
-OUTPUT_STRING = "output({knob}, {index}, {location})"
+INPUT_STRING = "input({knob}, {alias}, {location})"
+OUTPUT_STRING = "output({knob}, {alias}, {location})"
 
 KnobAlias = namedtuple("Alias", "knob alias default_value")
-KnobInput = namedtuple("Input", "knob index default_value start end")
-KnobOutput = namedtuple("Output", "knob index default_value")
+KnobInput = namedtuple("Input", "knob alias default_value")
+KnobOutput = namedtuple("Output", "knob alias default_value")
 
 ADA_KNOBS = [
     "knobs_to_bake_knobs",

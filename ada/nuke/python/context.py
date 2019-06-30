@@ -81,6 +81,7 @@ class Engine:
             .get("__template_class__", nuke.Text_Knob("null", "null"))
             .value()
         )
+        cls.template_class = None if cls.template_class == "" else cls.template_class
 
         # if we are not continuing a previous bake, then we need to
         # gather, sort and validate the nodes.
@@ -96,17 +97,18 @@ class Engine:
 
         # queue nodes for baking
         queue = cls.queue(bake_list)
+        getLog().info("template class: {}".format(cls.template_class))
 
         # execute registered global/template callbacks before
         cls.execute_callbacks("GLOBAL_BEFORE")
-        cls.execute_callbacks("TEMPLATE_BEFORE")
+        cls.execute_callbacks("TEMPLATE_BEFORE", template_class=cls.template_class)
 
         # process the nodes which have ada tabs
         results = cls.process(queue, bake_list, pause)
 
         # execute registered global/template callbacks after
         cls.execute_callbacks("TEMPLATE_AFTER")
-        cls.execute_callbacks("GLOBAL_AFTER")
+        cls.execute_callbacks("GLOBAL_AFTER", template_class=cls.template_class)
 
         return results
 
@@ -192,24 +194,37 @@ class Engine:
         return queues
 
     @classmethod
-    def execute_callbacks(cls, kind):
+    def execute_callbacks(cls, kind, template_class=None):
         """
         Callbacks are registered as global before/after or template specific.
 
         Args:
             kind (str): The callback group we want to execute.
+            template_class (str): Script class name stored on the root node of Nuke.
+
         """
         cbs_to_execute = callback_kinds[kind]
-
-        for registered_callbacks in cbs_to_execute:
-            getLog().info(
-                "Ada: Executing {kind} callback: {name}".format(
-                    kind=" ".join(kind.lower().split("_")), name=registered_callbacks
+        cb_message = "Ada: Executing {kind} callback: {name}"
+        for callback_name in cbs_to_execute:
+            if kind.startswith("GLOBAL"):
+                getLog().info(
+                    cb_message.format(
+                        kind=" ".join(kind.lower().split("_")),
+                        name=callback_name
+                    )
                 )
-            )
+                for cb in cbs_to_execute[callback_name]:
+                    cb.run()
 
-            for cb in cbs_to_execute[registered_callbacks]:
-                cb.run()
+            if kind.startswith("TEMPLATE") and template_class == callback_name:
+                getLog().info(
+                    cb_message.format(
+                        kind=" ".join(kind.lower().split("_")),
+                        name=callback_name
+                    )
+                )
+                for cb in cbs_to_execute[callback_name]:
+                    cb.run()
 
     @classmethod
     def process(cls, queues, all_nodes, break_point):

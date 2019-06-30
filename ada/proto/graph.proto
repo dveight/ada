@@ -20,8 +20,6 @@ message Attribute {
   Alias alias = 8;
 }
 
-
-
 message Queue {
   int32 order = 1;
   message Node {

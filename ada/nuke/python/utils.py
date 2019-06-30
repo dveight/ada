@@ -55,7 +55,7 @@ def parse_tcl_string(args):
                     previous_attr = getattr(previous_attr, argument)
                 except AttributeError:
                     if previous_attr:
-                        previous_attr = previous_attr.get(argument)
+                        previous_attr = previous_attr[argument]
         except IndexError:
             return previous_attr
         except AttributeError:
@@ -92,10 +92,6 @@ def deconstruct_knobs_to_serialise(alias):
         return KnobAlias(*args_index)
 
     if function_name.startswith("input"):
-        if len(args_index) != 6:
-            fill_by = 6 - (len(args_index)) - 1
-            [args_index.append(arg) for arg in range(fill_by)]
-
         return KnobInput(*args_index)
 
     if function_name.startswith("output"):

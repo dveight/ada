@@ -37,30 +37,15 @@ class AdaTestCase(unittest.TestCase):
 
         self.assertIsInstance(self.context.template.location, unicode)
 
-    def test_inputs_is_repeated(self):
+    def test_inputs(self):
 
-        self.context.inputs.add()
-        self.assertIsInstance(self.context.inputs, RepeatedCompositeContainer)
+        self.context.inputs["scan"] = "/jobs/SHOW/shot/scan/scan.####.exr"
+        self.assertTrue(self.context.inputs["scan"])
 
-    def test_inputs_attributes(self):
+    def test_ouputs(self):
 
-        self.context.inputs.add()
-        self.assertIsInstance(self.context.inputs[0].location, unicode)
-        self.assertIsInstance(self.context.inputs[0].range.start, int)
-        self.assertIsInstance(self.context.inputs[0].range.end, int)
-
-    def test_outputs_is_repeated(self):
-
-        self.context.outputs.add()
-
-        self.assertIsInstance(self.context.outputs, RepeatedCompositeContainer)
-
-    def test_outputs_attributes(self):
-
-        self.context.outputs.add()
-        self.assertIsInstance(self.context.outputs[0].location, unicode)
-        self.assertIsInstance(self.context.outputs[0].range.start, int)
-        self.assertIsInstance(self.context.outputs[0].range.end, int)
+        self.context.outputs["comp"] = "/jobs/SHOW/shot/out/comp.####.exr"
+        self.assertTrue(self.context.outputs["comp"])
 
     def test_aliases(self):
 

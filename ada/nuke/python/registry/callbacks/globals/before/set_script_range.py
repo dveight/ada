@@ -3,7 +3,7 @@ import nuke
 
 
 @register_global_callback_before
-class CleanUpAdaTabs:
+class SetScriptRange:
     name = "Root frame range example"
 
     def __init__(self):

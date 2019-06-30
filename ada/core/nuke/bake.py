@@ -1,5 +1,10 @@
 import os
 import argparse
+from ada.core.common import getLog
+from ada.core.graph import AdaGraph
+from ada.core.utils import run_command
+
+NUKE_COMMAND = ["/Applications/Nuke11.3v1/Nuke11.3v1.app/Contents/MacOS/Nuke11.3v1", "-i", "-t"]
 
 
 def parse_args():
@@ -9,14 +14,15 @@ def parse_args():
     )
 
     parser.add_argument(
-        "script",
+        "template",
         action="store",
         help="Template script to bake, ada file should be stored "
         "with the same name on disk.",
     )
 
     parser.add_argument(
-        "queues",
+        "--queues",
+        default=list(),
         action="store",
         help="Template script to bake, ada file should be stored "
         "with the same name on disk.",
@@ -41,12 +47,15 @@ def bake_graph(args):
     import nuke
     from ada.nuke.context import Engine
     from ada.nuke.utils import remove_ada_tab
+    from ada.nuke.publish import serialise_node_knobs
 
     engine = Engine()
     engine.fuel(args.template)
     baked = engine.run()
 
-    print("Ada: removing tabs")
+    graph = serialise_node_knobs(engine.queue(baked))
+
+    getLog().info("Ada: removing tabs")
     for node_name in baked:
         node = nuke.toNode(node_name)
         node["knobChanged"].setValue("")
@@ -57,11 +66,11 @@ def bake_graph(args):
     )
 
     nuke.scriptSaveAs(script_path, overwrite=True)
-    print("Ada: saving: {}".format(script_path))
+    getLog().info("Ada: saving: {}".format(script_path))
 
-    return script_path
+    return script_path, graph
 
 
 if __name__ == "__main__":
     args = parse_args()
-    bake_graph(args)
+    script, graph = bake_graph(args)

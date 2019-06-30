@@ -5,10 +5,9 @@ repo"""
 import sys
 import os
 import argparse
-import logging
-import subprocess
-
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+from ada.core.common import getLog
+from ada.core.utils import run_command
+from ada.core.graph import AdaGraph
 
 from ada.core.io import (
     read_graph_file,
@@ -31,36 +30,18 @@ def parse_args():
         action="store",
         help="Path to the template you want to bake"
     )
-
     parser.add_argument(
-        "--render-nodes",
+        "--all-nodes",
         action="store_true",
+        help=""
+    )
+    parser.add_argument(
+        "--Class",
+        action="store",
         help=""
     )
 
     return parser.parse_args()
-
-
-def run_command(command):
-    """
-    Run command and print out stdout in real time.
-
-    Args:
-        command (list): list of args that subprocess will run.
-
-    Returns:
-        int: poll code.
-    """
-    process = subprocess.Popen(command, stdout=subprocess.PIPE)
-    while True:
-        output = process.stdout.readline()
-        if output == '' and process.poll() is not None:
-            break
-        if output:
-            print output.strip()
-
-    rc = process.poll()
-    return rc
 
 
 if __name__ == "__main__":
@@ -69,7 +50,7 @@ if __name__ == "__main__":
     template = args.template
 
     if not os.path.exists(template):
-        logging.warning(
+        getLog().warning(
             "No template found: {0}".format(template)
         )
         sys.exit(-1)
@@ -78,14 +59,11 @@ if __name__ == "__main__":
     graph_file = pre + ".graph"
 
     if not os.path.exists(graph_file):
-        logging.warning(
+        getLog().warning(
             "No graph file found: {0}".format(graph_file)
         )
         sys.exit(-1)
 
-    graph = read_graph_file(graph_file)
-    print graph
-    if args.render_nodes:
-        for node in graph.nodes:
-            if node.Class == "Write":
-                print node.name
+    if args.all_nodes and args.Class:
+        nodes = AdaGraph(template).outputs()
+        print nodes
