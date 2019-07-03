@@ -70,4 +70,10 @@ or with more verbosity and vigor
 
 ```make check```
 
+### with Nuke
+
+You will need to specify the path to the nuke executable when you run cmake in order to run all of the tests using the internal nuke python interpreter, to do this simply add the NUKE_EXECUTABLE flag onto your cmake command.
+
+```-DNUKE_EXECUTABLE=/Applications/Nuke11.2v5/Nuke11.2v5.app/Contents/MacOS/Nuke11.2v5``` 
+
 Done! 

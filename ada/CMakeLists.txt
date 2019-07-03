@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 set(ADA_PYTHON lib/python/ada)
 set(ADA_CORE_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/${ADA_PYTHON})
 
@@ -19,7 +17,7 @@ add_custom_command(
 
 file(INSTALL "__init__.py" DESTINATION ${ADA_CORE_INSTALL_PATH})
 
-file(GLOB CORE_SRC "core/*(?!_pb2).py")
+file(GLOB CORE_SRC "core/*.py")
 list(APPEND CORE_SRC "core/ada_pb2.py" "core/graph_pb2.py")
 
 INSTALL(
