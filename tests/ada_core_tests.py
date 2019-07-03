@@ -38,14 +38,13 @@ class AdaTestCase(unittest.TestCase):
         self.assertIsInstance(self.context.template.location, unicode)
 
     def test_inputs(self):
+        self.context.inputs["scan"] = "/SHOW/shot/scan/scan.####.exr"
+        self.assertEqual(self.context.inputs["scan"], "/SHOW/shot/scan/scan.####.exr")
 
-        self.context.inputs["scan"] = "/jobs/SHOW/shot/scan/scan.####.exr"
-        self.assertTrue(self.context.inputs["scan"])
+    def test_outputs(self):
 
-    def test_ouputs(self):
-
-        self.context.outputs["comp"] = "/jobs/SHOW/shot/out/comp.####.exr"
-        self.assertTrue(self.context.outputs["comp"])
+        self.context.outputs["comp"] = "/SHOW/shot/out/comp.####.exr"
+        self.assertEqual(self.context.outputs["comp"], "/SHOW/shot/out/comp.####.exr")
 
     def test_aliases(self):
 

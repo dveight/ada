@@ -19,7 +19,8 @@ add_custom_command(
 
 file(INSTALL "__init__.py" DESTINATION ${ADA_CORE_INSTALL_PATH})
 
-file(GLOB CORE_SRC "core/*.py" )
+file(GLOB CORE_SRC "core/*(?!_pb2).py")
+list(APPEND CORE_SRC "core/ada_pb2.py" "core/graph_pb2.py")
 
 INSTALL(
     FILES ${CORE_SRC}
