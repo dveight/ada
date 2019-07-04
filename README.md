@@ -1,17 +1,20 @@
 # Ada
-Ada is a framework for creating executable scripts. Visual Effects pipelines require passing data
-around various applications, manipulating that input data with nodes and creating outputs which are
-used in other applications. Ada allows you to write an application specific execution framework that
-uses context data to manipulate the inputs. Users are able to setup a script, publish it then run a cli or gui which gives them
-options for inputs, output, and any other options they might need to choose before executing the
-script. 
+Ada is a framework for creating executable scripts. Visual Effects pipelines require passing alot of dataaround various applications, manipulating that data with nodes and creating outputs which are used in other applications. Ada allows you to write an application specific execution framework that
+passes an input context (protobuf) into a DCC along with a template scripts containing nodes with executable instructions on it (in Nuke this takes the form of a Ada tab on each node). 
+Users are able to setup a script, publish it (which saves out information about the execution order of the node graph) and run a cli or gui (todo) which gives them options for inputs, outputs, and any other attributes the creator decided to expose for manipulation. An Ada template becomes a node with inputs, outputs and attributes which is then executed.
 
  ## Nuke Example
  You have a project that has come in and half of it is shot on blue screens and the other half on green
  screens. You want to run an automatic despill process but you need the user to choose what colour the screen
  is. 
  
- ```ada nuke ~/jobs/INV/001_ab/publish/nk/ada/F_MultiAliasInput.nk --script-dir ~/jobs/INV/001_ab/001_ab_0010/nuke/comp --script-name test --kitten 1 --patrick 1000 --input input1 --input input2 --input input3``` 
+ ```ada nuke ~/jobs/INV/001_ab/publish/nk/ada/F_MultiAliasInput.nk --script-dir ~/jobs/INV/001_ab/001_ab_0010/nuke/comp --script-name comp --kitten 1 --robot-grade 1.0 --input-scan /path/to/scan --input-camera /camera/path``` 
+
+ ## Houdini Example
+
+ ## Katana Example
+
+ ## Gaffer Example
 
 # Patch Nuke Protobuf
 Nuke uses protobuf 2.5.0 which does not support structs. In order to use Ada in Nuke you will have
