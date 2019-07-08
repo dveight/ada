@@ -3,8 +3,9 @@ import argparse
 from ada.core.common import getLog
 from ada.core.graph import AdaGraph
 from ada.core.utils import run_command
+from .executable import NUKE_EXECUTABLE
 
-NUKE_COMMAND = ["/Applications/Nuke11.3v1/Nuke11.3v1.app/Contents/MacOS/Nuke11.3v1", "-i", "-t"]
+NUKE_COMMAND = [NUKE_EXECUTABLE, "-i", "-t"]
 
 
 def parse_args():

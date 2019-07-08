@@ -77,6 +77,43 @@ or with more verbosity and vigor
 
 You will need to specify the path to the nuke executable when you run cmake in order to run all of the tests using the internal nuke python interpreter, to do this simply add the NUKE_EXECUTABLE flag onto your cmake command.
 
-```-DNUKE_EXECUTABLE=/Applications/Nuke11.2v5/Nuke11.2v5.app/Contents/MacOS/Nuke11.2v5``` 
+```
+-DNUKE_EXECUTABLE=/Applications/Nuke11.2v5/Nuke11.2v5.app/Contents/MacOS/Nuke11.2v5
+```
+
+### with Gaffer
+
+Like Nuke testing, you will have to include the Gaffer executable path when you run your cmake command, to this simply add the GAFFER_EXECUTABLE flag to your cmake build.
+
+```
+-DGAFFER_EXECUTABLE=/Applications/gaffer-0.53.4.0-osx/bin/gaffer
+```
+
+#### on Mac
+
+Gaffer on Mac is built against python with ucs4 unicode bindings, this means that the `pip` or `homebrew` installed `google.protcolbuf` isn't compatible with Gaffer on the Mac. The easiest way to get a working install is to compile python with ucs4 enabled and then recompile protobuf's c++ implementation.
+
+##### compiling python ucs4
+
+download python from https://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz
+
+```bash
+# extract python 2.7.8 to /tmp/python
+> cd /tmp/python-2.7.8
+> ./Python-2.7.8/configure --enable-unicode=ucs4 --prefix=/tmp/python MACOSX_DEPLOYMENT_TARGET=10.13
+> make
+> make install
+```
+
+##### compiling google.protobuf with ucs4
+
+download protobuf from https://github.com/protocolbuffers/protobuf/archive/v3.7.1.zip
+
+```bash
+# extract google.protobuf to /tmp/protobuf-3.*.*
+> cd /tmp/protobuf-3.*.*/python
+> /tmp/python/bin/python setup.py build --cpp_implementation
+> cp -rf build/lib.macosx-10.13-x86_64-2.7/google /Applications/gaffer-0.53.4.0-osx/python/
+```
 
 Done! 
