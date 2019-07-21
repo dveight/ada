@@ -1,27 +1,66 @@
 """Utility functions used in Nuke to process python-ada-core tcl,
 python-ada-core tabs and to aid with baking down expressions."""
 
-from .globals import KnobAlias, KnobInput, KnobOutput, ADA_KNOBS
-
 import nuke
 
+import re
+import sys
 
-def represents_int(string):
+import functools
+
+from .globals import KnobAlias, KnobInput, KnobOutput, ADA_KNOBS
+
+__all__ = ["can_cast", "has_ada_tab", "monkey_patch", "parse_tcl_string", "deconstruct_knobs_to_serialise",
+           "remove_ada_tab", "get_class_name", "autolabel", "deserialise_knobs_to_serialise"]
+
+
+def can_cast(value, class_type):
     """
-    Check if the string is an int or not, used in the parse tcl string function for tcl expressions like
+    Check if the value can be cast to the class_type, used in the parse tcl string function for tcl expressions like
     [Ada inputs 0] or [Ada alias robotblur]
 
     Args:
-        string (int, str): Could be an int or a str.
+        value (object): The object we're attempting to cast.
+        class_type (class): The class we're attempting to cast to.
 
     Returns:
-
+        bool: If the value can be successfully cast
     """
     try:
-        int(string)
+        class_type(value)
         return True
     except ValueError:
         return False
+
+
+def has_ada_tab(node):
+    """
+    Checks to see if the node has an ada tab already added
+
+    Args:
+        node (nuke.Node): the nuke node to check
+
+    Returns:
+        bool: whether or not the node has the ada tab on it
+    """
+    return bool(node.knob("ada"))
+
+
+# noinspection PyPep8Naming
+class monkey_patch(object):
+    """
+    Patches a function and saves the original function as the variable f
+    """
+    def __init__(self, f):
+        self.f = f
+
+    def __call__(self, f):
+        @functools.wraps(f)
+        def w(*args, **kwargs):
+            return f(*args, **kwargs) or self.f(*args, **kwargs)
+        m = nuke if self.f.__module__ == "_nuke" else sys.modules[self.f.__module__]
+        setattr(m, self.f.__name__, w)
+        return w
 
 
 def parse_tcl_string(args):
@@ -43,7 +82,7 @@ def parse_tcl_string(args):
         # if an argument represents an int, then it is an index into
         # a list in the proto file.
         try:
-            if represents_int(argument):
+            if can_cast(argument, int):
                 argument = int(argument)
                 previous_attr = previous_attr[int(argument)]
                 continue
@@ -82,11 +121,12 @@ def deconstruct_knobs_to_serialise(alias):
     if alias == "":
         return
 
-    function_name, args_str = alias.split("(")
-    raw_args_index = args_str.split(",")
-    raw_args_index[-1] = raw_args_index[-1].replace(")", "")
+    match = re.match(r"(\w+)\((\w+) (\w+) (\w+)\)", alias)
+    if not match:
+        return
 
-    args_index = [argument.strip() for argument in raw_args_index]
+    function_name = match.groups()[0]
+    args_index = [argument.strip() for argument in match.groups()[1:]]
 
     if function_name.startswith("alias"):
         return KnobAlias(*args_index)
@@ -118,13 +158,12 @@ def remove_ada_tab(nodes=None, ask=False):
     if not isinstance(nodes, list):
         nodes = [nodes]
 
-    result = nuke.message("Delete Ada tab on {0} node(s) OK?".format(len(nodes)))
-    if nuke.GUI and ask and not result:
+    if nuke.GUI and ask and not nuke.ask("Delete Ada tab on {0} node(s)?".format(len(nodes))):
         return
 
     for node in nodes:
         # remove knobs
-        for knobName in reversed(ADA_KNOBS):
+        for knobName in ADA_KNOBS:
             knob = node.knob(knobName)
             if knob:
                 node.removeKnob(knob)

@@ -11,7 +11,7 @@ from registry.store import callback_kinds
 from ada.core.common import getLog
 
 
-class Engine:
+class Engine(object):
     """
     Engine is the core class for executing Ada in Nuke. When passing a template in from the cli the static method
     fuel is called to inject the user specified template into nuke then all the nodes will be gathered and executed
