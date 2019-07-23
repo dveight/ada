@@ -1,8 +1,14 @@
 import nuke
 import nukescripts.panels
 
-
 from .utils import deserialise_knobs_to_serialise, get_class_name
+from .globals import (
+    INPUT_NODES,
+    OUTPUT_NODES,
+    IGNORE_KNOBS,
+)
+from ..core.common import getLog
+
 
 __all__ = ["AddKnobsToAda"]
 
@@ -10,10 +16,12 @@ __all__ = ["AddKnobsToAda"]
 class AddKnobsToAda(nukescripts.panels.PythonPanel):
 
     def __init__(self, node):
-        if nuke.GUI:
-            raise RuntimeError("unable to create AddKnobsToAda in gui mode")
+        """
 
-        nukescripts.PythonPanel.__init__(self, "com.ada.AliasCreator")
+        Args:
+            node:
+        """
+        super(AddKnobsToAda, self).__init__("com.ada.AliasCreator")
         # CREATE KNOBS
         self.node = node
         self.class_name = get_class_name(node)
@@ -24,6 +32,12 @@ class AddKnobsToAda(nukescripts.panels.PythonPanel):
         self.addKnob(self.node_name)
 
     def create_knobs(self):
+        """
+
+        Returns:
+            True if the knobs are successfully created
+
+        """
         knobs = extract_knobs(self.node)
         if not knobs:
             nuke.message("No knobs can be set on this node")
@@ -93,6 +107,15 @@ class AddKnobsToAda(nukescripts.panels.PythonPanel):
 
 
 def extract_knobs(node):
+    """
+
+    Args:
+        node (nuke.Node):
+
+    Returns:
+        list of knobs (nuke.Knob)
+
+    """
     knobs = []
     knob_names = []
     for knob in range(node.numKnobs()):
