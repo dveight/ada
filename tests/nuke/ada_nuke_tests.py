@@ -6,22 +6,18 @@ import shutil
 
 import nuke
 
-from ada.core import ada_pb2, graph_pb2
-from ada.core.io import read_graph_file, read_ada_file, write_proto_file
+from ada.core.utils import is_nuke, is_gaffer
+import ada.core.nuke.executable
 
 from ada.nuke.node import add_ada_tab, ada_knob_changed
-from ada.nuke.utils import remove_ada_tab, monkey_patch
+from ada.nuke.utils import remove_ada_tab, monkey_patch, deconstruct_knobs_to_serialise
 from ada.nuke.globals import ADA_KNOBS
-
-from google.protobuf.pyext._message import (
-    RepeatedCompositeContainer,
-    RepeatedScalarContainer,
-)
 
 
 @monkey_patch(nuke.thisKnob)
 def this_knob():
     return this_knob.k
+
 
 @monkey_patch(nuke.thisNode)
 def this_node():
@@ -32,10 +28,43 @@ this_knob.n = None
 this_knob.k = None
 
 
+class AdaCoreNukeTestCase(unittest.TestCase):
+
+    def test_nuke_executable(self):
+        self.assertTrue(ada.core.nuke.executable.NUKE_EXECUTABLE)
+        self.assertTrue(os.path.exists(ada.core.nuke.executable.NUKE_EXECUTABLE))
+
+    def test_is_nuke(self):
+        self.assertTrue(is_nuke())
+
+    def test_is_gaffer(self):
+        self.assertFalse(is_gaffer())
+
+
+class AdaNukeUtilsTestCase(unittest.TestCase):
+
+    def test_deconstruct_knobs_to_serialise_aliases(self):
+        alias_knob = deconstruct_knobs_to_serialise("aliases(knob_name alias_name 100)")
+        self.assertEqual(alias_knob.knob, "knob_name")
+        self.assertEqual(alias_knob.alias, "alias_name")
+        self.assertEqual(alias_knob.default_value, "100")
+
+    def test_deconstruct_knobs_to_serialise_inputs(self):
+        inputs_knob = deconstruct_knobs_to_serialise("inputs(input_name alias_name filepath)")
+        self.assertEqual(inputs_knob.knob, "input_name")
+        self.assertEqual(inputs_knob.alias, "alias_name")
+        self.assertEqual(inputs_knob.default_value, "filepath")
+
+    def test_deconstruct_knobs_to_serialise_outputs(self):
+        outputs_knob = deconstruct_knobs_to_serialise("outputs(output_name alias_name filepath)")
+        self.assertEqual(outputs_knob.knob, "output_name")
+        self.assertEqual(outputs_knob.alias, "alias_name")
+        self.assertEqual(outputs_knob.default_value, "filepath")
+
+
 class AdaNukeNodeTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.context = ada_pb2.Context()
         self.tempdir = None
 
     def test_add_and_remove_ada_tab(self):
@@ -95,7 +124,6 @@ class AdaNukeNodeTestCase(unittest.TestCase):
         self.assertEqual(write.knobs().keys(), knob_names)
 
     def tearDown(self):
-        del self.context
         if self.tempdir and os.path.exists(self.tempdir):
             shutil.rmtree(self.tempdir)
         for node in nuke.allNodes():

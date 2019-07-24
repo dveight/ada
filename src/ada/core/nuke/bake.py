@@ -3,7 +3,7 @@ import argparse
 from ada.core.common import getLog
 from ada.core.graph import AdaGraph
 from ada.core.utils import run_command
-from .executable import NUKE_EXECUTABLE
+from ada.core.nuke.executable import NUKE_EXECUTABLE
 
 NUKE_COMMAND = [NUKE_EXECUTABLE, "-i", "-t"]
 

@@ -21,3 +21,33 @@ def run_command(command):
 
     rc = process.poll()
     return rc
+
+
+def is_nuke():
+    """
+    Are we running inside of the Nuke environment
+
+    Returns:
+        bool: are we running in a nuke environment
+
+    """
+    try:
+        import _nuke
+        return True
+    except ImportError:
+        return False
+
+
+def is_gaffer():
+    """
+    Are we running inside of the Gaffer environment
+
+    Returns:
+        bool: are we running in a gaffer environment
+
+    """
+    try:
+        import Gaffer
+        return True
+    except ImportError:
+        return False

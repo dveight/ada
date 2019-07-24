@@ -7,11 +7,21 @@ import shutil
 from ada.core import ada_pb2
 from ada.core import graph_pb2
 from ada.core.io import read_graph_file, read_ada_file, write_proto_file
+from ada.core.utils import is_nuke, is_gaffer
 
 from google.protobuf.pyext._message import (
     RepeatedCompositeContainer,
     RepeatedScalarContainer,
 )
+
+
+class AdaCoreTestCase(unittest.TestCase):
+
+    def test_is_nuke(self):
+        self.assertFalse(is_nuke())
+
+    def test_is_gaffer(self):
+        self.assertFalse(is_gaffer())
 
 
 class AdaTestCase(unittest.TestCase):

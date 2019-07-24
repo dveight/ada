@@ -121,7 +121,7 @@ def deconstruct_knobs_to_serialise(alias):
     if alias == "":
         return
 
-    match = re.match(r"(\w+)\((\w+) (\w+) (\w+)\)", alias)
+    match = re.match(r"(\w+)\((\w+)(?:[ ,]+)?(\w+)(?:[ ,]+)?(\w+)\)", alias)
     if not match:
         return
 
