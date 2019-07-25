@@ -11,16 +11,16 @@ KnobInput = namedtuple("Input", "knob alias default_value")
 KnobOutput = namedtuple("Output", "knob alias default_value")
 
 ADA_KNOBS = [
-    "knobs_to_bake_knobs",
-    "knobs_to_knobs_to_bake",
-    "knobs_to_set_knobs",
-    "knobs_to_knobs_to_set",
+    "bake_knobs",
+    "knobs_to_bake",
+    "set_knobs",
+    "knobs_to_set",
     "execute_knobs",
     "knobs_to_execute",
     "execute_code",
     "code_to_execute",
     "queue_order",
-    "do_not_knobs_to_bake",
+    "do_not_bake",
     "knobs_to_serialise",
     "ada",
 ]

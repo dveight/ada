@@ -112,3 +112,6 @@ cmake-build-debug
 
 # protocol buffers
 *_pb2.py*
+
+# ada application executables
+executable.py

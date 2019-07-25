@@ -3,5 +3,3 @@ proc Ada {args} {
     # python - split by space then use getattr getattr(ada.Context(), list[index])
     return [python -eval "ada.nuke.utils.parse_tcl_string('$args')"]
 }
-
-
