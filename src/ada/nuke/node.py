@@ -56,7 +56,7 @@ def add_ada_tab(nodes=None):
         knobs_to_bake_string.clearFlag(nuke.STARTLINE)
         knobs_to_bake_string.setTooltip(
             "comma-separated list of knobs to bake, or values "
-            "to assign. eg: 'value=10, file=[pcrn input 1]'"
+            "to assign. eg: 'value=10, file=[ada input 1]'"
         )
 
         set_knobs_boolean = nuke.Boolean_Knob("set_knobs", " ")
@@ -69,7 +69,7 @@ def add_ada_tab(nodes=None):
         )
         knobs_to_set_string.clearFlag(nuke.STARTLINE)
         knobs_to_set_string.setTooltip(
-            "assign value. eg: 'value=10, file=[pcrn input 1]'"
+            "assign value. eg: 'value=10, file=[ada input 1]'"
         )
 
         execute_buttons_boolean = nuke.Boolean_Knob("execute_knobs", " ")

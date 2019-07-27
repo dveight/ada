@@ -10,20 +10,21 @@ KnobAlias = namedtuple("Alias", "knob alias default_value")
 KnobInput = namedtuple("Input", "knob alias default_value")
 KnobOutput = namedtuple("Output", "knob alias default_value")
 
-ADA_KNOBS = [
-    "bake_knobs",
-    "knobs_to_bake",
-    "set_knobs",
-    "knobs_to_set",
-    "execute_knobs",
-    "knobs_to_execute",
-    "execute_code",
-    "code_to_execute",
+ADA_KNOB_PAIRS = {
+    "bake_knobs": "knobs_to_bake",
+    "set_knobs": "knobs_to_set",
+    "execute_knobs": "knobs_to_execute",
+    "execute_code": "code_to_execute"
+}
+
+ADA_KNOBS = ADA_KNOB_PAIRS.keys() + ADA_KNOB_PAIRS.values() + [
     "queue_order",
     "do_not_bake",
     "knobs_to_serialise",
     "ada",
 ]
+
+ADA_OPTIONAL_KNOBS = ["__run"]
 
 IGNORE_KNOBS = [
     "help",

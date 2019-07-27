@@ -4,8 +4,7 @@ import unittest2 as unittest
 
 import shutil
 
-from ada.core import ada_pb2
-from ada.core import graph_pb2
+from ada.core import ada_pb2, graph_pb2
 from ada.core.io import read_graph_file, read_ada_file, write_proto_file
 from ada.core.utils import is_nuke, is_gaffer
 
@@ -34,14 +33,15 @@ class AdaTestCase(unittest.TestCase):
 
         script = self.context.output_script
 
+        self.assertIsInstance(script, ada_pb2.Script)
         self.assertIsInstance(script.dir, unicode)
         self.assertIsInstance(script.name, unicode)
 
-    def test_script_range(self):
+    def test_frame_range(self):
 
-        script_range = self.context.script_frame_range
-        self.assertIsInstance(script_range.start, int)
-        self.assertIsInstance(script_range.end, int)
+        frame_range = self.context.frame_range
+        self.assertIsInstance(frame_range.start, int)
+        self.assertIsInstance(frame_range.end, int)
 
     def test_template_location_is_unicode(self):
 
@@ -65,16 +65,21 @@ class AdaTestCase(unittest.TestCase):
 
         self.assertIsInstance(self.context.host, int)
 
-    def test_job(self):
+    def test_show(self):
 
-        self.assertIsInstance(self.context.job, unicode)
+        self.assertIsInstance(self.context.show, unicode)
 
     def test_shot(self):
 
         self.assertIsInstance(self.context.shot, unicode)
 
     def test_format(self):
-        self.assertIsInstance(self.context.format, unicode)
+        format_ = self.context.format
+
+        self.assertIsInstance(format_, ada_pb2.Format)
+        self.assertIsInstance(format_.width, int)
+        self.assertIsInstance(format_.height, int)
+        self.assertIsInstance(format_.pixel_aspect, float)
 
     def test_read_write_context(self):
         self.tempdir = tempfile.mkdtemp()

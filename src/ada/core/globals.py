@@ -3,4 +3,4 @@ specific references."""
 
 from .ada_pb2 import Context
 
-ALL_FILE_EXT = {Context.NUKE: ".nk", Context.MAYA: ".ma", Context.KATANA: ".kat"}
+ALL_FILE_EXT = {Context.NUKE: ".nk", Context.MAYA: ".ma", Context.KATANA: ".kat", Context.GAFFER: ".gfr"}

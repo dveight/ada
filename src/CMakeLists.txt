@@ -3,9 +3,6 @@ set(ADA_CORE_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/lib/python)
 set(ADA_PROTO_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/proto)
 set(ADA_COMPILE_OUT ${CMAKE_CURRENT_SOURCE_DIR}/ada/core)
 
-# install the nuke tcl file to lib nuke folder which needs to be on the NUKE_PATH
-install(FILES Ada.tcl DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/nuke)
-
 # compile the protobuffers into our src structure
 add_custom_target(CREATE_ADA ALL DEPENDS proto/ada.proto proto/graph.proto)
 add_custom_command(

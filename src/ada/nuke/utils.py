@@ -1,17 +1,18 @@
 """Utility functions used in Nuke to process python-ada-core tcl,
 python-ada-core tabs and to aid with baking down expressions."""
 
-import nuke
-
 import re
 import sys
 
+import nuke
+
 import functools
 
-from .globals import KnobAlias, KnobInput, KnobOutput, ADA_KNOBS
+from .globals import KnobAlias, KnobInput, KnobOutput, ADA_KNOBS, ADA_KNOB_PAIRS, ADA_OPTIONAL_KNOBS
 
-__all__ = ["can_cast", "has_ada_tab", "monkey_patch", "parse_tcl_string", "deconstruct_knobs_to_serialise",
-           "remove_ada_tab", "get_class_name", "autolabel", "deserialise_knobs_to_serialise"]
+
+__all__ = ["can_cast", "has_ada_tab", "can_bake_node", "monkey_patch", "parse_tcl_string", "remove_ada_tab",
+           "get_class_name", "autolabel", "deconstruct_knobs_to_serialise", "deserialise_knobs_to_serialise"]
 
 
 def can_cast(value, class_type):
@@ -29,7 +30,7 @@ def can_cast(value, class_type):
     try:
         class_type(value)
         return True
-    except ValueError:
+    except (ValueError, TypeError):
         return False
 
 
@@ -43,7 +44,25 @@ def has_ada_tab(node):
     Returns:
         bool: whether or not the node has the ada tab on it
     """
-    return bool(node.knob("ada"))
+    return isinstance(node.knob("ada"), nuke.Tab_Knob)
+
+
+def can_bake_node(node):
+    """
+    Checks to see if the node has an ada tab, is not set to 'do not bake' and has values to bake
+
+    Args:
+        node (nuke.Node): The node to check to see if any knobs are set for baking
+
+    Returns:
+        bool: Whether or not the node can be baked
+    """
+    if not has_ada_tab(node) or node["do_not_bake"].value():
+        return False
+    for enable, value in ADA_KNOB_PAIRS.items():
+        if node[enable].value() and node[value].value():
+            return True
+    return False
 
 
 # noinspection PyPep8Naming
@@ -68,39 +87,35 @@ def parse_tcl_string(args):
     Iterate over the args of a tcl string, split by space and look up data in the Ada context.
 
     Args:
-        args (str): A string of arguments from tcl.
+        args (str): A string of arguments from tcl, eg. "inputs 0"
 
     Returns:
-        attribute: An attribute from the Ada context.
+        attribute: An attribute from the Ada context or None if it can't be found
 
     """
-    previous_attr = None
-
     argument_list = args.split(" ")
 
-    for index, argument in enumerate(argument_list):
-        # if an argument represents an int, then it is an index into
-        # a list in the proto file.
-        try:
-            if can_cast(argument, int):
-                argument = int(argument)
-                previous_attr = previous_attr[int(argument)]
-                continue
+    if len(argument_list) < 1:
+        return
 
-            if index == 0:
-                previous_attr = getattr(nuke.Ada, argument)
-            else:
+    previous_attr = getattr(nuke.Ada, argument_list[0])
+
+    for argument in argument_list[1:]:
+        try:
+            # if an argument represents an int, then it is an index into
+            # a list in the proto file.
+            if can_cast(argument, int):
                 try:
-                    previous_attr = getattr(previous_attr, argument)
-                except AttributeError:
-                    if previous_attr:
-                        previous_attr = previous_attr[argument]
-        except IndexError:
-            return previous_attr
-        except AttributeError:
-            return previous_attr
-        except TypeError:
-            return previous_attr
+                    previous_attr = previous_attr[int(argument)]
+                    continue
+                except TypeError:
+                    pass
+            if hasattr(previous_attr, argument):
+                previous_attr = getattr(previous_attr, argument)
+            else:
+                previous_attr = previous_attr[argument]
+        except (IndexError, AttributeError, TypeError, ValueError):
+            return None
 
     return previous_attr
 
@@ -121,7 +136,7 @@ def deconstruct_knobs_to_serialise(alias):
     if alias == "":
         return
 
-    match = re.match(r"(\w+)\((\w+)(?:[ ,]+)?(\w+)(?:[ ,]+)?(\w+)\)", alias)
+    match = re.match(r"(\w+)\((\w+)(?:[ ,]+)?(\w+)(?:[ ,]+)?([^, ]+)\)", alias)
     if not match:
         return
 
@@ -162,9 +177,9 @@ def remove_ada_tab(nodes=None, ask=False):
         return
 
     for node in nodes:
-        # remove knobs
-        for knobName in ADA_KNOBS:
-            knob = node.knob(knobName)
+        # check and remove optional knobs and ada knobs too
+        for knob_name in ADA_OPTIONAL_KNOBS + ADA_KNOBS:
+            knob = node.knob(knob_name)
             if knob:
                 node.removeKnob(knob)
 

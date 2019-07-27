@@ -10,6 +10,7 @@ import nuke
 from registry.store import callback_kinds
 from ada.core.common import getLog
 
+from .utils import has_ada_tab
 
 class Engine(object):
     """
@@ -47,8 +48,8 @@ class Engine(object):
         except RuntimeError as err:
             getLog().warning("Ada: '{0}'".format(err))
 
-        start = nuke.Ada.script_frame_range.start
-        end = nuke.Ada.script_frame_range.end
+        start = nuke.Ada.frame_range.start
+        end = nuke.Ada.frame_range.end
 
         root = nuke.Root()
         root["first_frame"].setValue(start)
@@ -84,7 +85,7 @@ class Engine(object):
         cls.template_class = None if cls.template_class == "" else cls.template_class
 
         # if we are not continuing a previous bake, then we need to
-        # gather, sort and validate the nodes.
+        # gather, sort and clean_up the nodes.
         if not bake_list:
             cls.input_nodes = nodes or nuke.allNodes(recurseGroups=True)
             gathered_nodes = cls.gather(cls.input_nodes)
@@ -93,7 +94,7 @@ class Engine(object):
             getLog().info("Ada: Nodes to bake: {0}".format(bake_list))
 
         # run validation code / frame work before executing tabs
-        cls.validate(bake_list)
+        cls.clean_up(bake_list)
 
         # queue nodes for baking
         queue = cls.queue(bake_list)
@@ -112,29 +113,23 @@ class Engine(object):
 
         return results
 
-    @staticmethod
-    def gather(nodes):
+    @classmethod
+    def gather(cls, nodes):
         """
-        Gather up all nuke nodes for Ada Tab.
+        Gather up all nuke nodes with an Ada Tab and sort them
+
+        Args:
+            nodes (list(nuke.Node)): the list of nodes to filter out with Ada executable knobs and sort them
 
         Returns:
             nodes (list): list of node names.
         """
         nodes_to_process = []
         for node in nodes:
-            if node.knobs().get("ada"):
-                do_not_bake = node["do_not_bake"].value()
-                if do_not_bake:
-                    continue
+            if has_ada_tab(node) and not node["do_not_bake"].value():
                 nodes_to_process.append(node.fullName())
 
-        def convert(text):
-            return int(text) if text.isdigit() else text
-
-        return sorted(
-            nodes_to_process,
-            key=lambda _nodes: [convert(node) for node in re.split("([0-9]+)", _nodes)],
-        )
+        return cls.alpha_numeric_sort(nodes_to_process)
 
     @staticmethod
     def alpha_numeric_sort(nodes):
@@ -153,16 +148,16 @@ class Engine(object):
 
         return sorted(
             nodes,
-            key=lambda _nodes: [convert(node) for node in re.split("([0-9]+)", _nodes)],
+            key=lambda _nodes: [convert(n) for n in re.split("([0-9]+)", _nodes)],
         )
 
     @staticmethod
-    def validate(full_node_names):
+    def clean_up(full_node_names):
         """
         Run validation checks that need to happen before executing.
 
         Args:
-            full_node_names (str): Full node name of the current node
+            full_node_names (list(str)): Full node name of the current node
                 we are validating.
 
         """
@@ -331,8 +326,8 @@ class Engine(object):
         if value is None:
             if isinstance(knob, nuke.Array_Knob):
                 views = nuke.views()
-                start = nuke.Ada.script_frame_range.start
-                end = nuke.Ada.script_frame_range.end
+                start = nuke.Ada.frame_range.start
+                end = nuke.Ada.frame_range.end
                 for view in views:
                     curves = knob.animations(view)
                     for curve in curves:
