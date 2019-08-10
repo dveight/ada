@@ -1,6 +1,7 @@
 import os
 import tempfile
 import unittest2 as unittest
+from distutils.spawn import find_executable
 
 import shutil
 
@@ -12,9 +13,10 @@ import ada.core.gaffer.executable
 
 class AdaCoreGafferTestCase(unittest.TestCase):
 
-    def test_nuke_executable(self):
+    def test_GAFFER_EXECUTABLE(self):
         self.assertTrue(ada.core.gaffer.executable.GAFFER_EXECUTABLE)
-        self.assertTrue(os.path.exists(ada.core.gaffer.executable.GAFFER_EXECUTABLE))
+        path_to_executable = find_executable(ada.core.gaffer.executable.GAFFER_EXECUTABLE.split()[0])
+        self.assertTrue(os.path.exists(path_to_executable))
 
     def test_is_nuke(self):
         self.assertFalse(is_nuke())

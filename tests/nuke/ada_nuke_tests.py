@@ -1,6 +1,8 @@
 import os
 import tempfile
 import unittest2 as unittest
+from distutils.spawn import find_executable
+
 
 import shutil
 
@@ -38,7 +40,8 @@ class AdaCoreNukeTestCase(unittest.TestCase):
 
     def test_nuke_executable(self):
         self.assertTrue(ada.core.nuke.executable.NUKE_EXECUTABLE)
-        self.assertTrue(os.path.exists(ada.core.nuke.executable.NUKE_EXECUTABLE))
+        path_to_executable = find_executable(ada.core.nuke.executable.NUKE_EXECUTABLE.split()[0])
+        self.assertTrue(os.path.exists(path_to_executable))
 
     def test_is_nuke(self):
         self.assertTrue(is_nuke())
