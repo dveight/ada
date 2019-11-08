@@ -1,0 +1,69 @@
+#!/usr/bin/env python2.7
+
+"""command line script for launching Ada in any host application that has been added to the applications
+repo"""
+import sys
+import os
+import argparse
+from ada.core.common import getLog
+from ada.core.utils import run_command
+from ada.core.graph import AdaGraph
+
+from ada.core.io import (
+    read_graph_file,
+)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Ada is a template baking system that can be run in any application that supports python."
+    )
+    parser.add_argument(
+        "application",
+        action="store",
+        choices={"nuke", "katana"},
+        help="the application you are running Ada inside of. Nuke, Maya, Houdini, Katana etc."
+    )
+
+    parser.add_argument(
+        "template",
+        action="store",
+        help="Path to the template you want to bake"
+    )
+    parser.add_argument(
+        "--all-nodes",
+        action="store_true",
+        help=""
+    )
+    parser.add_argument(
+        "--Class",
+        action="store",
+        help=""
+    )
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    template = args.template
+
+    if not os.path.exists(template):
+        getLog().warning(
+            "No template found: {0}".format(template)
+        )
+        sys.exit(-1)
+
+    pre, ext = os.path.splitext(template)
+    graph_file = pre + ".graph"
+
+    if not os.path.exists(graph_file):
+        getLog().warning(
+            "No graph file found: {0}".format(graph_file)
+        )
+        sys.exit(-1)
+
+    if args.all_nodes and args.Class:
+        nodes = AdaGraph(template).outputs()
+        print nodes

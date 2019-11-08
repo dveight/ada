@@ -102,3 +102,16 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# pycharm build directory
+cmake-build-debug
+.idea
+
+# osx
+.DS_Store
+
+# protocol buffers
+*_pb2.py*
+
+# ada application executables
+executable.py

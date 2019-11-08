@@ -1,0 +1,44 @@
+syntax = "proto3";
+package ada;
+
+message Attribute {
+  string name = 1;
+  string label = 2;
+  string value = 3;
+  repeated string values = 4;
+  bool animated = 5;
+  string Class = 6;
+  enum AdaTypes {
+    ALIAS = 0;
+    INPUT = 1;
+    OUTPUT = 2;
+  }
+  AdaTypes type = 7;
+  message Alias {
+    string name = 1;
+  }
+  Alias alias = 8;
+}
+
+message Queue {
+  int32 order = 1;
+  message Node {
+    string name = 1;
+    string full_name = 2;
+    repeated Attribute attributes = 3;
+    string Class = 4;
+  }
+  repeated Node nodes = 2;
+}
+
+message Scene {
+
+  message Root {
+    float fps = 1;
+    repeated string views = 2;
+  }
+
+  repeated Queue queue = 1;
+  Root root = 2;
+
+}
