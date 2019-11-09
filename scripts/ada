@@ -294,15 +294,6 @@ def run_template_with_args(args, results):
         results (dict): Dictionary of alias data.
     """
 
-    # very simple validation of inputs and outputs
-    print results, args
-    # assert len(args.inputs) == results["inputs"], "Wrong number of inputs! I was given {} and require {}".format(
-    #     len(args.inputs), results["inputs"]
-    # )
-    # assert len(args.outputs) == results["outputs"], "Wrong number of outputs! I was given {} and require {}".format(
-    #     len(args.outputs), results["outputs"]
-    # )
-
     # create context object and set all the data from the args
     context = ada_pb2.Context()
 
