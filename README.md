@@ -15,7 +15,7 @@ Ada consists of a few parts.
 * Graph files can be created after a template is executed to pass further information to other processes such as rendering
 
 The cli provided is only one way to create Ada contexts. The core API is meant to work in each DCC and can be used in its own way to create and serialise data. A simple example of this would be passing values directly from a Houdini scene directly into a Nuke template and knowing the exact parameters you have to pass into the Nuke template.
- ## Nuke Example
+ ## Foundry Nuke Example
  You have a project that has come in and half of it is shot on blue screens and the other half on green
  screens. You want to run an automatic despill process but you need the user to choose what colour the screen
  is. 
