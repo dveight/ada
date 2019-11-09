@@ -1,14 +1,28 @@
 # Ada
-Ada is a framework for creating executable scripts. Visual Effects pipelines require passing alot of dataaround various applications, manipulating that data with nodes and creating outputs which are used in other applications. Ada allows you to write an application specific execution framework that
-passes an input context (protobuf) into a DCC along with a template scripts containing nodes with executable instructions on it (in Nuke this takes the form of a Ada tab on each node). 
-Users are able to setup a script, publish it (which saves out information about the execution order of the node graph) and run a cli or gui (todo) which gives them options for inputs, outputs, and any other attributes the creator decided to expose for manipulation. An Ada template becomes a node with inputs, outputs and attributes which is then executed.
+Visual Effects pipelines require passing a lot of data around various applications, manipulating that data with nodes and creating outputs which are used in other applications. 
 
+A templates creator can decide what values the artist needs to change or an application needs to set. This effectively turns a template into a function/node which takes inputs, attributes, and outputs.
+
+Each application has its own sets of requirements of how they want to externalise parameters to users and how to implement the execution framework.
+
+Ada consists of a few parts. 
+* A template which create a graph containing information about the templates parameters.
+ * *  This is usually created at publish time into an asset management system.
+* The Ada cli takes an application argument and a template, the template should have an associated graph file which is used to dynamically build command line arguments for the user
+* The arguments values are fed into an Ada context and serialised to a protobuf
+* Each application implents a command line script to launch headless to read the template, the context file and then execute the nodes in the specific way that DCC determines.
+* Rendering of the baked script should be implemented as part of your internal pipeline, Ada is aimed at creating executable templates which can (but not always) create renderable outputs.
+* Graph files can be created after a template is executed to pass further information to other processes such as rendering
+
+The cli provided is only one way to create Ada contexts. The core API is meant to work in each DCC and can be used in its own way to create and serialise data. A simple example of this would be passing values directly from a Houdini scene directly into a Nuke template and knowing the exact parameters you have to pass into the Nuke template.
  ## Nuke Example
  You have a project that has come in and half of it is shot on blue screens and the other half on green
  screens. You want to run an automatic despill process but you need the user to choose what colour the screen
  is. 
  
  ```ada nuke ~/jobs/INV/001_ab/publish/nk/ada/F_MultiAliasInput.nk --script-dir ~/jobs/INV/001_ab/001_ab_0010/nuke/comp --script-name comp --kitten 1 --robot-grade 1.0 --input-scan /path/to/scan --input-camera /camera/path``` 
+ 
+ Each argument after --script-name is dynamically created by the cli and driven by the creator of the template.
 
  ## Gaffer Example
  
