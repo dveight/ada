@@ -11,5 +11,6 @@ class SetScriptRange:
 
     @classmethod
     def run(cls):
-        nuke.Root()["first_frame"].setValue(1000)
-        nuke.Root()["last_frame"].setValue(2000)
+        """Put code here to run before a template executes"""
+        print "executing callback!"
+
