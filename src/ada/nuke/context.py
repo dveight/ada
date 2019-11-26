@@ -421,6 +421,11 @@ class Engine(object):
                     )
                 )
             finally:
+                # if nuke.delete(nuke.thisNode) is called in code to execute
+                # the node.removeKnob will throw a ValueError
+                if not node:
+                     return success
+
                 node.removeKnob(py_script_knob)
                 return success
 
