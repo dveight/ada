@@ -32,7 +32,7 @@ I'd love to get Travis running the tests on the core module for Ada but I don't 
 
 ## Coding styleguide
 
-We generally follow [pep8](https://www.python.org/dev/peps/pep-0008/) using the [black] code linter with these additional requirements:
+We generally follow [pep8](https://www.python.org/dev/peps/pep-0008/) using the [black](https://github.com/psf/black) code linter with these additional requirements:
 
 - For docstrings please use the [google style](https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings)
 
