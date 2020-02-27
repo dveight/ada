@@ -24,8 +24,6 @@ We want to keep this library backwards compatible to python 2.7 for now. The rea
 
 We have some, reliable tests for Nuke and we want to keep it that way, so please write sufficient tests for your contributions for your DCC's and where possible we also want to keep the coverage at 100%. 
 
-If there are good reasons for not covering parts of the code, please explicitely exclude them either via `# pragma: no cover` directly in the code or by specifying it in the [.coveragerc](.coveragerc) file.
-
 ### Travis
 I'd love to get Travis running the tests on the core module for Ada but I don't have time, but maybe you do!
 
