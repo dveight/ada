@@ -1,6 +1,4 @@
-from ada.core.io import (
-    read_graph_file,
-)
+from ada.core.io import read_graph_file
 
 
 class AdaGraph:
@@ -54,5 +52,3 @@ class AdaGraph:
                     if attribute.type == 2:
                         _nodes.append(node.full_name)
         return _nodes
-
-

@@ -13,4 +13,3 @@ class SetScriptRange:
     def run(cls):
         """Put code here to run before a template executes"""
         print "executing callback!"
-

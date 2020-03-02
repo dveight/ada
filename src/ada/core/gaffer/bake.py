@@ -2,6 +2,7 @@ from .executable import GAFFER_EXECUTABLE
 
 GAFFER_COMMAND = [GAFFER_EXECUTABLE, "-t"]
 
+
 def bake_graph(args):
     """
     bakes a gaffer script out removing / substituting any ada variables

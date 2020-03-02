@@ -1,4 +1,3 @@
-
 import nuke
 
 from ada.core.common import getLog
@@ -15,15 +14,17 @@ from .globals import (
     KNOB_TO_EXECUTION_TYPE,
 )
 from .gui import AddKnobsToAda
-from .utils import (
-    deconstruct_knobs_to_serialise,
-    get_class_name,
-    has_ada_tab
-)
+from .utils import deconstruct_knobs_to_serialise, get_class_name, has_ada_tab
 
 from .globals import ALIAS_STRING
 
-__all__ = ["add_ada_tab", "add_knob_to_bake", "ada_knob_changed", "add_knob_to_ada_tab", "set_alias_knob"]
+__all__ = [
+    "add_ada_tab",
+    "add_knob_to_bake",
+    "ada_knob_changed",
+    "add_knob_to_ada_tab",
+    "set_alias_knob",
+]
 
 
 def add_ada_tab(nodes=None):
@@ -178,18 +179,24 @@ def add_knob_to_bake(node):
             if node_class in INPUT_NODES:
                 if knob not in INPUT_NODES[node_class]:
                     continue
-                knob_to_serialise = INPUT_STRING.format(knob=knob, alias=alias.value(), location=value.value())
+                knob_to_serialise = INPUT_STRING.format(
+                    knob=knob, alias=alias.value(), location=value.value()
+                )
                 knobs.append(knob_to_serialise)
 
             elif node_class in OUTPUT_NODES:
                 if knob not in OUTPUT_NODES[node_class]:
                     continue
 
-                knob_to_serialise = OUTPUT_STRING.format(knob=knob, alias=alias.value(), location=value.value())
+                knob_to_serialise = OUTPUT_STRING.format(
+                    knob=knob, alias=alias.value(), location=value.value()
+                )
                 knobs.append(knob_to_serialise)
 
             else:
-                knob_to_serialise = ALIAS_STRING.format(knob=knob, alias=alias.value(), default=value.value())
+                knob_to_serialise = ALIAS_STRING.format(
+                    knob=knob, alias=alias.value(), default=value.value()
+                )
                 knobs.append(knob_to_serialise)
 
     node["knobs_to_serialise"].setValue("\n".join(knobs))
@@ -231,13 +238,19 @@ def ada_knob_changed():
             execution_type = KNOB_TO_EXECUTION_TYPE.get(knob.Class())
             if isinstance(ada_data, KnobAlias):
                 set_alias_knob(knob, expression, ada_data, "aliases")
-                add_knob_to_ada_tab(this_node, execution_type, "aliases", knob, ada_data.alias)
+                add_knob_to_ada_tab(
+                    this_node, execution_type, "aliases", knob, ada_data.alias
+                )
             if isinstance(ada_data, KnobInput):
                 set_alias_knob(knob, expression, ada_data, "inputs")
-                add_knob_to_ada_tab(this_node, execution_type, "inputs", knob, ada_data.alias)
+                add_knob_to_ada_tab(
+                    this_node, execution_type, "inputs", knob, ada_data.alias
+                )
             if isinstance(ada_data, KnobOutput):
                 set_alias_knob(knob, expression, ada_data, "outputs")
-                add_knob_to_ada_tab(this_node, execution_type, "outputs", knob, ada_data.alias)
+                add_knob_to_ada_tab(
+                    this_node, execution_type, "outputs", knob, ada_data.alias
+                )
 
 
 def add_knob_to_ada_tab(node, execution_type, data_type, knob, alias):

@@ -7,8 +7,8 @@ import argparse
 import subprocess
 
 from ada.core import (
-    ada_pb2, graph_pb2,
-
+    ada_pb2,
+    graph_pb2,
 )
 from ada.core.common import getLog
 
@@ -61,31 +61,38 @@ def print_template_args(results):
 
     template_name = os.path.basename(args.template)
 
-    message = "{} requires {} inputs".format(template_name, len(results.get("inputs", 0)))
+    message = "{} requires {} inputs".format(
+        template_name, len(results.get("inputs", 0))
+    )
     messages.append(message)
     for _input in inputs:
         values = " "
         if _input["values"] is not None:
             values = "\tPossible values: {}".format(", ".join(_input["values"]))
-        argument = "input argument: --input-{}\n\tdefault value: {}\n{}".format(_input["name"], _input["value"], values)
+        argument = "input argument: --input-{}\n\tdefault value: {}\n{}".format(
+            _input["name"], _input["value"], values
+        )
         messages.append(argument)
 
-    message = "{} requires {} outputs\n".format(template_name, len(results.get("outputs", 0)))
+    message = "{} requires {} outputs\n".format(
+        template_name, len(results.get("outputs", 0))
+    )
 
     messages.append(message)
     for _input in outputs:
         values = " "
         if _input["values"] is not None:
             values = "\tPossible values: {}".format(", ".join(_input["values"]))
-        argument = "output argument: --output-{}\n\tdefault value: {}\n{}".format(_input["name"], _input["value"], values)
+        argument = "output argument: --output-{}\n\tdefault value: {}\n{}".format(
+            _input["name"], _input["value"], values
+        )
         messages.append(argument)
 
     message = "{} queues {}\n".format(template_name, results.get("queues", 0))
     messages.append(message)
 
     message = "{} has {} aliases these can be specified as arguments using '--alias value'".format(
-        template_name,
-        len(aliases)
+        template_name, len(aliases)
     )
     line = "-" * 100
 
@@ -96,18 +103,21 @@ def print_template_args(results):
         values = " "
         if alias["values"] is not None:
             values = "\tPossible values: {}".format(", ".join(alias["values"]))
-        argument = "alias argument: --{}\n\tdefault value: {}\n{}".format(alias["name"], alias["value"], values)
+        argument = "alias argument: --{}\n\tdefault value: {}\n{}".format(
+            alias["name"], alias["value"], values
+        )
         messages.append(argument)
 
     if messages:
-        message = "Below is a list of template specific " \
-                  "arguments that you can pass into the Ada CLI"
+        message = (
+            "Below is a list of template specific "
+            "arguments that you can pass into the Ada CLI"
+        )
         line = "-" * 100
         messages.insert(0, message)
         messages.insert(1, line)
     else:
-        messages = ["The input template has "
-                    "no aliases to set!"]
+        messages = ["The input template has " "no aliases to set!"]
 
     for message in messages:
         print(message)
@@ -124,44 +134,32 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(
         description="Ada is a template baking system that can be run "
-                    "in any application that supports python.",
-        conflict_handler="resolve"
+        "in any application that supports python.",
+        conflict_handler="resolve",
     )
     parser.add_argument(
         "application",
         action="store",
         choices={"nuke", "katana"},
         help="the application you are running Ada inside of. Nuke, "
-             "Maya, Houdini, Katana etc."
+        "Maya, Houdini, Katana etc.",
     )
 
     parser.add_argument(
-        "template",
-        action="store",
-        help="Path to the template you want to bake"
+        "template", action="store", help="Path to the template you want to bake"
     )
 
-    parser.add_argument(
-        "--job",
-        action="store",
-        help="Job name."
-    )
-    parser.add_argument(
-        "--shot",
-        action="store",
-        help="Shot name."
-    )
+    parser.add_argument("--job", action="store", help="Job name.")
+    parser.add_argument("--shot", action="store", help="Shot name.")
 
     parser.add_argument(
         "--script-dir",
         action="store",
-        help="Directory path where your baked script will be saved."
+        help="Directory path where your baked script will be saved.",
     )
 
     parser.add_argument(
-        "--script-name",
-        action="store",
-        help="Script name (including extension)."
+        "--script-name", action="store", help="Script name (including extension)."
     )
 
     parser.add_argument(
@@ -171,14 +169,10 @@ def parse_args():
         type=int,
         default=[1001, 1002],
         metavar=("start", "end"),
-        help="Start and end frame range for your script."
+        help="Start and end frame range for your script.",
     )
 
-    parser.add_argument(
-        "--format",
-        action="store",
-        help="Script format"
-    )
+    parser.add_argument("--format", action="store", help="Script format")
 
     parser.add_argument(
         "--input",
@@ -187,7 +181,7 @@ def parse_args():
         default=[],
         nargs="+",
         help="Input data for your template. Repeat argument to "
-             "specify multiple inputs. "
+        "specify multiple inputs. ",
     )
 
     parser.add_argument(
@@ -197,7 +191,7 @@ def parse_args():
         default=[],
         nargs="+",
         help="Output data for your template. Repeat argument to "
-             "specify multiple inputs. "
+        "specify multiple inputs. ",
     )
 
     parser.add_argument(
@@ -207,7 +201,7 @@ def parse_args():
         default=[],
         nargs="+",
         help="Execute any number of queues",
-        metavar="1 2 10 11"
+        metavar="1 2 10 11",
     )
 
     parser.add_argument(
@@ -215,7 +209,7 @@ def parse_args():
         action="store_true",
         dest="list_requirements",
         help="List template context requirements, these are for "
-             "passing values into the template."
+        "passing values into the template.",
     )
 
     known_args = parser.parse_known_args()
@@ -223,7 +217,7 @@ def parse_args():
     graph = get_graph_file(template)
     inputs, outputs, aliases = [], [], []
     queues = dict()
-    nodes = []
+
     for queue in graph.queue:
         queues[queue.order] = []
         for node in queue.nodes:
@@ -239,13 +233,13 @@ def parse_args():
                         action="store",
                         default=attribute.value.strip(),
                         metavar="This is a attribute variable specified "
-                                "in the template: {0}".format(attribute.alias.name)
+                        "in the template: {0}".format(attribute.alias.name),
                     )
                     aliases.append(
                         dict(
                             name=attribute.alias.name,
                             value=attribute.value,
-                            values=attribute.values or None
+                            values=attribute.values or None,
                         )
                     )
                 elif kind == "INPUT":
@@ -255,13 +249,13 @@ def parse_args():
                         action="store",
                         default=attribute.alias.name,
                         metavar="This is a input variable specified "
-                                "in the template: {0}".format(attribute.alias.name)
+                        "in the template: {0}".format(attribute.alias.name),
                     )
                     inputs.append(
                         dict(
                             name=attribute.alias.name,
                             value=attribute.value,
-                            values=attribute.values or None
+                            values=attribute.values or None,
                         )
                     )
 
@@ -272,16 +266,18 @@ def parse_args():
                         action="store",
                         default=attribute.value.strip(),
                         metavar="This is a output variable specified "
-                                "in the template: {0}".format(attribute.alias.name)
+                        "in the template: {0}".format(attribute.alias.name),
                     )
                     outputs.append(
                         dict(
                             name=attribute.alias.name,
                             value=attribute.value,
-                            values=attribute.values or None
+                            values=attribute.values or None,
                         )
                     )
-        requirements = dict(aliases=aliases, inputs=inputs, outputs=outputs, queues=queues)
+        requirements = dict(
+            aliases=aliases, inputs=inputs, outputs=outputs, queues=queues
+        )
     return parser.parse_args(), requirements
 
 
@@ -337,6 +333,7 @@ def run_template_with_args(args, results):
     # command
     if context.host == context.NUKE:
         from ada.core.nuke import bake
+
         module_name = bake.__file__
         if module_name.endswith(".pyc"):
             module_name = module_name[:-1]
@@ -359,7 +356,7 @@ def run_command(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE)
     while True:
         output = process.stdout.readline()
-        if output == '' and process.poll() is not None:
+        if output == "" and process.poll() is not None:
             break
         if output:
             getLog().info(output.strip())
@@ -377,15 +374,12 @@ if __name__ == "__main__":
 
     if not args.script_name or not args.script_dir:
         getLog().warning(
-            "No script name or script dir set - "
-            "please set them and try again!"
+            "No script name or script dir set - " "please set them and try again!"
         )
         sys.exit(-1)
 
     if not args.template:
-        getLog().warning(
-            "No template specified - please supply a template!"
-        )
+        getLog().warning("No template specified - please supply a template!")
         sys.exit(-1)
 
     run_template_with_args(args, results)

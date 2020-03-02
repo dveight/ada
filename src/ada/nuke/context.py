@@ -54,7 +54,9 @@ class Engine(object):
         root["first_frame"].setValue(start)
         root["last_frame"].setValue(end)
 
-        getLog().info("Ada: setting root range: start: {0}, end: {1}".format(start, end))
+        getLog().info(
+            "Ada: setting root range: start: {0}, end: {1}".format(start, end)
+        )
 
         getLog().info("Ada: Fuel end.")
 
@@ -209,8 +211,7 @@ class Engine(object):
             if kind.startswith("GLOBAL"):
                 getLog().info(
                     cb_message.format(
-                        kind=" ".join(kind.lower().split("_")),
-                        name=callback_name
+                        kind=" ".join(kind.lower().split("_")), name=callback_name
                     )
                 )
                 for cb in cbs_to_execute[callback_name]:
@@ -219,8 +220,7 @@ class Engine(object):
             if kind.startswith("TEMPLATE") and template_class == callback_name:
                 getLog().info(
                     cb_message.format(
-                        kind=" ".join(kind.lower().split("_")),
-                        name=callback_name
+                        kind=" ".join(kind.lower().split("_")), name=callback_name
                     )
                 )
                 for cb in cbs_to_execute[callback_name]:
@@ -424,7 +424,7 @@ class Engine(object):
                 # if nuke.delete(nuke.thisNode) is called in code to execute
                 # the node.removeKnob will throw a ValueError
                 if not node:
-                     return success
+                    return success
 
                 node.removeKnob(py_script_knob)
                 return success

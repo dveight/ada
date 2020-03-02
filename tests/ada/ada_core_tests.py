@@ -1,8 +1,12 @@
 import os
 import tempfile
-import unittest2 as unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 
 import shutil
+import sys 
 
 from ada.core import ada_pb2
 from ada.core import graph_pb2
@@ -109,7 +113,7 @@ class GraphTestCase(unittest.TestCase):
 
         node = queue.nodes.add()
 
-        self.assertIsInstance(node.name, unicode)
+        self.assertIsInstance(node.name, str)
         self.assertIsInstance(node.Class, unicode)
         self.assertIsInstance(node.full_name, unicode)
 

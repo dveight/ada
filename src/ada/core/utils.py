@@ -24,9 +24,6 @@ def run_command(command):
 
 
 def is_nuke():
-    """
-    Are we running inside of the Nuke environment
-
     Returns:
         bool: are we running in a nuke environment
 
