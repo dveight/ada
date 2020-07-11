@@ -14,7 +14,6 @@ __all__ = ["AddKnobsToAda"]
 
 
 class AddKnobsToAda(nukescripts.panels.PythonPanel):
-
     def __init__(self, node):
         """
 

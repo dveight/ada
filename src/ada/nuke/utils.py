@@ -10,8 +10,17 @@ import functools
 
 from .globals import KnobAlias, KnobInput, KnobOutput, ADA_KNOBS
 
-__all__ = ["can_cast", "has_ada_tab", "monkey_patch", "parse_tcl_string", "deconstruct_knobs_to_serialise",
-           "remove_ada_tab", "get_class_name", "autolabel", "deserialise_knobs_to_serialise"]
+__all__ = [
+    "can_cast",
+    "has_ada_tab",
+    "monkey_patch",
+    "parse_tcl_string",
+    "deconstruct_knobs_to_serialise",
+    "remove_ada_tab",
+    "get_class_name",
+    "autolabel",
+    "deserialise_knobs_to_serialise",
+]
 
 
 def can_cast(value, class_type):
@@ -51,6 +60,7 @@ class monkey_patch(object):
     """
     Patches a function and saves the original function as the variable f
     """
+
     def __init__(self, f):
         self.f = f
 
@@ -58,6 +68,7 @@ class monkey_patch(object):
         @functools.wraps(f)
         def w(*args, **kwargs):
             return f(*args, **kwargs) or self.f(*args, **kwargs)
+
         m = nuke if self.f.__module__ == "_nuke" else sys.modules[self.f.__module__]
         setattr(m, self.f.__name__, w)
         return w
@@ -158,7 +169,11 @@ def remove_ada_tab(nodes=None, ask=False):
     if not isinstance(nodes, list):
         nodes = [nodes]
 
-    if nuke.GUI and ask and not nuke.ask("Delete Ada tab on {0} node(s)?".format(len(nodes))):
+    if (
+        nuke.GUI
+        and ask
+        and not nuke.ask("Delete Ada tab on {0} node(s)?".format(len(nodes)))
+    ):
         return
 
     for node in nodes:
@@ -180,8 +195,9 @@ def remove_ada_tab(nodes=None, ask=False):
 
 def get_class_name(node):
     """
-    Simple wrapper to get a _class knob off a node so that you can use standard nuke nodes like group, NoOp etc, but
-    give them their own "class".
+    Simple wrapper to get a _class knob off a node so that 
+    you can use standard nuke nodes like group, NoOp etc, 
+    but give them their own "class".
 
     Args:
         node (nuke.Node): A node object we want to get a class from.
